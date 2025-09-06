@@ -1,4 +1,5 @@
 import { AppSidebar } from "@/components/admin/app-sidebar";
+import { ModeToggle } from "@/components/mode-toggle";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -23,7 +24,7 @@ export default function AdminLayout({
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 justify-between pr-4">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator
@@ -44,6 +45,7 @@ export default function AdminLayout({
               </BreadcrumbList>
             </Breadcrumb>
           </div>
+          <ModeToggle/>
         </header>
         {children}
       </SidebarInset>

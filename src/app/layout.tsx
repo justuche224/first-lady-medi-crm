@@ -49,7 +49,7 @@ export default function RootLayout({
       <body className={`${figtree.variable} ${instrumentSerif.variable}`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >
