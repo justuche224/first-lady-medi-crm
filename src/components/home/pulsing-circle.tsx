@@ -1,15 +1,41 @@
-"use client"
+"use client";
 
-import { PulsingBorder } from "@paper-design/shaders-react"
-import { motion } from "framer-motion"
+import { PulsingBorder } from "@paper-design/shaders-react";
+import { motion } from "framer-motion";
 
 export default function PulsingCircle() {
+  const circleVariants = {
+    hidden: { opacity: 0, scale: 0 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 1,
+        delay: 1,
+        ease: [0.25, 0.46, 0.45, 0.94] as const,
+      },
+    },
+  } as const;
+
   return (
-    <div className="absolute bottom-8 right-8 z-30">
-      <div className="relative w-20 h-20 flex items-center justify-center">
+    <motion.div
+      className="absolute bottom-8 right-8 z-30 max-lg:bottom-4 max-lg:right-4 max-sm:bottom-2 max-sm:right-2"
+      variants={circleVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <div className="relative w-20 h-20 flex items-center justify-center max-sm:w-16 max-sm:h-16">
         {/* Pulsing Border Circle */}
         <PulsingBorder
-          colors={["#BEECFF", "#E77EDC", "#FF4C3E", "#00FF88", "#FFD700", "#FF6B35", "#8A2BE2"]}
+          colors={[
+            "#BEECFF",
+            "#E77EDC",
+            "#FF4C3E",
+            "#00FF88",
+            "#FFD700",
+            "#FF6B35",
+            "#8A2BE2",
+          ]}
           colorBack="#00000000"
           speed={1.5}
           roundness={1}
@@ -45,7 +71,10 @@ export default function PulsingCircle() {
           style={{ transform: "scale(1.6)" }}
         >
           <defs>
-            <path id="circle" d="M 50, 50 m -38, 0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" />
+            <path
+              id="circle"
+              d="M 50, 50 m -38, 0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0"
+            />
           </defs>
           <text className="text-sm fill-white/80 instrument">
             <textPath href="#circle" startOffset="0%">
@@ -54,6 +83,6 @@ export default function PulsingCircle() {
           </text>
         </motion.svg>
       </div>
-    </div>
-  )
+    </motion.div>
+  );
 }

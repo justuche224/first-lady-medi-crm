@@ -1,23 +1,32 @@
 "use client";
 
-import type React from "react";
+import React from "react";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { MeshGradient } from "@paper-design/shaders-react";
 
 interface ShaderBackgroundProps {
   children: React.ReactNode;
 }
 
-export default function ShaderBackground({ children }: ShaderBackgroundProps) {
+const ShaderBackground = React.memo(function ShaderBackground({
+  children,
+}: ShaderBackgroundProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isActive, setIsActive] = useState(false);
-  console.log(isActive);
+
+  const gradientColors1 = useMemo(
+    () => ["#0f172a", "#6366f1", "#a5b4fc", "#334155", "#1e293b"],
+    []
+  );
+  const gradientColors2 = useMemo(
+    () => ["#0f172a", "#e2e8f0", "#6366f1", "#0f172a"],
+    []
+  );
+
+  const handleMouseEnter = useCallback(() => {}, []);
+  const handleMouseLeave = useCallback(() => {}, []);
 
   useEffect(() => {
-    const handleMouseEnter = () => setIsActive(true);
-    const handleMouseLeave = () => setIsActive(false);
-
     const container = containerRef.current;
     if (container) {
       container.addEventListener("mouseenter", handleMouseEnter);
@@ -30,7 +39,7 @@ export default function ShaderBackground({ children }: ShaderBackgroundProps) {
         container.removeEventListener("mouseleave", handleMouseLeave);
       }
     };
-  }, []);
+  }, [handleMouseEnter, handleMouseLeave]);
 
   return (
     <div
@@ -42,34 +51,33 @@ export default function ShaderBackground({ children }: ShaderBackgroundProps) {
         <defs>
           <filter
             id="glass-effect"
-            x="-50%"
-            y="-50%"
-            width="200%"
-            height="200%"
+            x="-10%"
+            y="-20%"
+            width="100%"
+            height="100%"
           >
-            <feTurbulence baseFrequency="0.005" numOctaves="1" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.3" />
+            <feTurbulence baseFrequency="0.01" numOctaves="1" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.2" />
             <feColorMatrix
               type="matrix"
-              values="1 0 0 0 0.02
-                      0 1 0 0 0.02
-                      0 0 1 0 0.05
-                      0 0 0 0.9 0"
-              result="tint"
+              values="1 0 0 0 0.01
+                      0 1 0 0 0.01
+                      0 0 1 0 0.02
+                      0 0 0 0.95 0"
             />
           </filter>
           <filter
             id="gooey-filter"
-            x="-50%"
-            y="-50%"
-            width="200%"
-            height="200%"
+            x="-10%"
+            y="-20%"
+            width="100%"
+            height="100%"
           >
-            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
             <feColorMatrix
               in="blur"
               mode="matrix"
-              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 12 -5"
               result="gooey"
             />
             <feComposite in="SourceGraphic" in2="gooey" operator="atop" />
@@ -80,15 +88,15 @@ export default function ShaderBackground({ children }: ShaderBackgroundProps) {
       {/* Background Shaders */}
       <MeshGradient
         className="absolute inset-0 w-full h-full"
-        colors={["#0f172a", "#6366f1", "#a5b4fc", "#334155", "#1e293b"]}
-        speed={0.3}
+        colors={gradientColors1}
+        speed={0.05}
         // @ts-expect-error: works
         backgroundColor="#0f172a"
       />
       <MeshGradient
         className="absolute inset-0 w-full h-full opacity-60"
-        colors={["#0f172a", "#e2e8f0", "#6366f1", "#0f172a"]}
-        speed={0.2}
+        colors={gradientColors2}
+        speed={0.05}
         // @ts-expect-error: works
         wireframe="true"
         backgroundColor="transparent"
@@ -97,4 +105,6 @@ export default function ShaderBackground({ children }: ShaderBackgroundProps) {
       {children}
     </div>
   );
-}
+});
+
+export default ShaderBackground;

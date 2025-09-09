@@ -51,11 +51,11 @@ export function LoginForm({
   };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
+      <Card className="backdrop-blur-sm bg-white/10 rounded-2xl p-8 border border-white/20 shadow-2xl text-white">
         <CardHeader>
           <span className="text-3xl font-bold">Medi CRM</span>
           <CardTitle>Login to your account</CardTitle>
-          <CardDescription>
+          <CardDescription className="text-white">
             If you are a new patient, please contact your doctor to get access
             to your account.
           </CardDescription>
@@ -64,12 +64,13 @@ export function LoginForm({
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-white">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="your@email.com"
                   required
+                  className="text-white placeholder:text-white"
                   disabled={loading}
                   autoComplete="email"
                   value={email}
@@ -78,10 +79,10 @@ export function LoginForm({
               </div>
               <div className="grid gap-3">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="text-white">Password</Label>
                   <a
                     href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline text-white"
                   >
                     Forgot your password?
                   </a>
@@ -94,11 +95,12 @@ export function LoginForm({
                   autoComplete="current-password"
                   value={password}
                   placeholder="********"
+                  className="text-white placeholder:text-white"
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
               <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full text-white" disabled={loading}>
                   {loading && <Loader className="animate-spin" />}
                   Login
                 </Button>
