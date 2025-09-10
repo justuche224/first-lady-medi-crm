@@ -414,6 +414,11 @@ export async function getDashboardStatistics() {
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
+    // Format dates for SQL
+    const startOfMonthStr = startOfMonth.toISOString().split("T")[0];
+    const endOfMonthStr = endOfMonth.toISOString().split("T")[0];
+    const todayStr = today.toISOString().split("T")[0];
+
     // Get various statistics
     const [userStats, appointmentStats, departmentStats, feedbackStats] =
       await Promise.all([
@@ -424,7 +429,7 @@ export async function getDashboardStatistics() {
             totalPatients: sql<number>`count(case when role = 'patient' then 1 end)`,
             totalDoctors: sql<number>`count(case when role = 'doctor' then 1 end)`,
             totalStaff: sql<number>`count(case when role = 'staff' then 1 end)`,
-            newUsersThisMonth: sql<number>`count(case when ${users.createdAt} between ${startOfMonth} and ${endOfMonth} then 1 end)`,
+            newUsersThisMonth: sql<number>`count(case when DATE(${users.createdAt}) >= ${startOfMonthStr} and DATE(${users.createdAt}) <= ${endOfMonthStr} then 1 end)`,
           })
           .from(users),
 
@@ -432,7 +437,7 @@ export async function getDashboardStatistics() {
         db
           .select({
             totalAppointments: sql<number>`count(*)`,
-            todayAppointments: sql<number>`count(case when date(${appointments.appointmentDate}) = current_date then 1 end)`,
+            todayAppointments: sql<number>`count(case when DATE(${appointments.appointmentDate}) = ${todayStr} then 1 end)`,
             completedAppointments: sql<number>`count(case when status = 'completed' then 1 end)`,
             pendingAppointments: sql<number>`count(case when status in ('scheduled', 'confirmed') then 1 end)`,
           })
@@ -466,6 +471,182 @@ export async function getDashboardStatistics() {
     };
   } catch (error) {
     console.error("Error fetching dashboard statistics:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+/**
+ * Get department statistics for dashboard (Admin Only)
+ *
+ * Fetches department-wise statistics including patients, satisfaction, and appointments.
+ */
+export async function getDepartmentStats() {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user?.id) {
+      throw new Error("Unauthorized");
+    }
+
+    const user = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, session.user.id))
+      .limit(1);
+
+    if (!user[0] || user[0].role !== "admin") {
+      throw new Error("Admin access required");
+    }
+
+    // Get department statistics
+    const deptStats = await db
+      .select({
+        name: departments.name,
+        patients: sql<number>`count(distinct ${patients.id})`,
+        appointments: sql<number>`count(distinct ${appointments.id})`,
+        satisfaction: sql<number>`avg(${feedback.rating}) * 20`, // Convert 1-5 rating to percentage
+      })
+      .from(departments)
+      .leftJoin(doctors, eq(departments.id, doctors.departmentId))
+      .leftJoin(
+        patients,
+        sql`${patients.id} in (
+        select patient_id from appointments where doctor_id = ${doctors.id}
+      )`
+      )
+      .leftJoin(appointments, eq(doctors.id, appointments.doctorId))
+      .leftJoin(feedback, eq(departments.id, feedback.departmentId))
+      .groupBy(departments.id, departments.name)
+      .limit(4);
+
+    return {
+      success: true,
+      departments: deptStats.map((dept) => ({
+        name: dept.name,
+        patients: Number(dept.patients) || 0,
+        satisfaction: Math.round(Number(dept.satisfaction) || 0),
+        appointments: Number(dept.appointments) || 0,
+      })),
+    };
+  } catch (error) {
+    console.error("Error fetching department statistics:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+/**
+ * Get recent activities for dashboard (Admin Only)
+ *
+ * Fetches recent system activities including appointments, feedback, and user registrations.
+ */
+export async function getRecentActivities(limit = 10) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user?.id) {
+      throw new Error("Unauthorized");
+    }
+
+    const user = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, session.user.id))
+      .limit(1);
+
+    if (!user[0] || user[0].role !== "admin") {
+      throw new Error("Admin access required");
+    }
+
+    const activities = [];
+
+    // Get recent appointments
+    const recentAppointments = await db
+      .select({
+        id: appointments.id,
+        type: sql<string>`'appointment'`,
+        message: sql<string>`concat('Appointment ', ${appointments.status}, ' by patient')`,
+        time: appointments.createdAt,
+        priority: sql<string>`'normal'`,
+      })
+      .from(appointments)
+      .orderBy(desc(appointments.createdAt))
+      .limit(3);
+
+    activities.push(
+      ...recentAppointments.map((apt) => ({
+        ...apt,
+        message: `Appointment ${apt.message} - ID: ${apt.id}`,
+        time: apt.time.toISOString(),
+      }))
+    );
+
+    // Get recent feedback
+    const recentFeedback = await db
+      .select({
+        id: feedback.id,
+        type: sql<string>`'feedback'`,
+        message: sql<string>`concat('New feedback received: ', ${feedback.subject})`,
+        time: feedback.createdAt,
+        priority: sql<string>`case when ${feedback.priority} = 'urgent' then 'high' else 'normal' end`,
+      })
+      .from(feedback)
+      .orderBy(desc(feedback.createdAt))
+      .limit(3);
+
+    activities.push(
+      ...recentFeedback.map((fb) => ({
+        ...fb,
+        time: fb.time.toISOString(),
+      }))
+    );
+
+    // Get recent user registrations
+    const recentUsers = await db
+      .select({
+        id: users.id,
+        type: sql<string>`case when ${users.role} = 'patient' then 'new_patient' else 'staff' end`,
+        message: sql<string>`concat('New ', ${users.role}, ' registered: ', ${users.name})`,
+        time: users.createdAt,
+        priority: sql<string>`'low'`,
+      })
+      .from(users)
+      .orderBy(desc(users.createdAt))
+      .limit(2);
+
+    activities.push(
+      ...recentUsers.map((user) => ({
+        ...user,
+        time: user.time.toISOString(),
+      }))
+    );
+
+    // Sort by time and limit
+    activities.sort(
+      (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
+    );
+
+    return {
+      success: true,
+      activities: activities.slice(0, limit).map((activity) => ({
+        id: activity.id,
+        type: activity.type,
+        message: activity.message,
+        time: activity.time,
+        priority: activity.priority,
+      })),
+    };
+  } catch (error) {
+    console.error("Error fetching recent activities:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

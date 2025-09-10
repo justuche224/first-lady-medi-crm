@@ -85,6 +85,56 @@ export {
   type SendMessageData,
 } from "./message-actions";
 
+// Department Management Actions (Admin Only)
+export {
+  createDepartment,
+  getDepartments,
+  updateDepartment,
+  deleteDepartment,
+  getDepartmentDetails,
+  getAvailableDoctors,
+  type CreateDepartmentData,
+  type UpdateDepartmentData,
+} from "./department-actions";
+
+// Doctor Management Actions (Admin Only)
+export {
+  createDoctor,
+  getDoctors,
+  updateDoctor,
+  deleteDoctor,
+  toggleDoctorBan,
+  getDoctorDetails,
+  type CreateDoctorData,
+  type UpdateDoctorData,
+} from "./doctor-actions";
+
+// Patient Management Actions (Admin Only)
+export {
+  createPatient,
+  getPatients,
+  updatePatient,
+  deletePatient,
+  togglePatientBan,
+  getPatientDetails,
+  type CreatePatientData,
+  type UpdatePatientData,
+} from "./patient-actions";
+
+// Staff Management Actions (Admin Only)
+export {
+  createStaff,
+  getStaffs,
+  updateStaff,
+  deleteStaff,
+  toggleStaffBan,
+  getStaffDetails,
+  getDepartments as getStaffDepartments,
+  getSupervisors,
+  type CreateStaffData,
+  type UpdateStaffData,
+} from "./staff-actions";
+
 // Reports & Analytics Actions
 export {
   generateAppointmentReport,
@@ -92,6 +142,8 @@ export {
   generateRevenueReport,
   getReports,
   getDashboardStatistics,
+  getRecentActivities,
+  getDepartmentStats,
   deleteReport,
   type GenerateReportData,
 } from "./report-actions";

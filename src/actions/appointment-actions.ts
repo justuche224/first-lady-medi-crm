@@ -9,9 +9,7 @@
 import { db } from "@/db";
 import {
   appointments,
-  user as users,
-  user as doctorUsers,
-  user as patientUsers,
+  user,
   patients,
   doctors,
 } from "@/db/schema";
@@ -19,6 +17,11 @@ import { eq, and, sql, desc } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { alias } from "drizzle-orm/pg-core";
+
+// Create proper aliases for the user table
+const patientUsers = alias(user, 'patientUsers');
+const doctorUsers = alias(user, 'doctorUsers');
 
 // Types
 export interface CreateAppointmentData {
@@ -65,13 +68,13 @@ export async function createAppointment(
       throw new Error("Unauthorized");
     }
 
-    const user = await db
+    const currentUser = await db
       .select()
-      .from(users)
-      .where(eq(users.id, session.user.id))
+      .from(user)
+      .where(eq(user.id, session.user.id))
       .limit(1);
 
-    if (!user[0]) {
+    if (!currentUser[0]) {
       throw new Error("User not found");
     }
 
@@ -98,12 +101,12 @@ export async function createAppointment(
     }
 
     // Access control
-    if (user[0].role === "patient") {
+    if (currentUser[0].role === "patient") {
       // Patients can only book appointments for themselves
       if (patient[0].userId !== session.user.id) {
         throw new Error("You can only book appointments for yourself");
       }
-    } else if (user[0].role === "doctor") {
+    } else if (currentUser[0].role === "doctor") {
       // Doctors can only create appointments for their patients
       if (doctor[0].userId !== session.user.id) {
         throw new Error("You can only create appointments for yourself");
@@ -182,13 +185,13 @@ export async function getAppointments(
       throw new Error("Unauthorized");
     }
 
-    const user = await db
+    const currentUser = await db
       .select()
-      .from(users)
-      .where(eq(users.id, session.user.id))
+      .from(user)
+      .where(eq(user.id, session.user.id))
       .limit(1);
 
-    if (!user[0]) {
+    if (!currentUser[0]) {
       throw new Error("User not found");
     }
 
@@ -197,7 +200,7 @@ export async function getAppointments(
     // Build where clause based on user role
     let whereClause = sql`true`;
 
-    if (user[0].role === "patient") {
+    if (currentUser[0].role === "patient") {
       const patient = await db
         .select()
         .from(patients)
@@ -207,7 +210,7 @@ export async function getAppointments(
       if (patient[0]) {
         whereClause = sql`${appointments.patientId} = ${patient[0].id}`;
       }
-    } else if (user[0].role === "doctor") {
+    } else if (currentUser[0].role === "doctor") {
       const doctor = await db
         .select()
         .from(doctors)
@@ -232,27 +235,27 @@ export async function getAppointments(
       } BETWEEN ${dateRange.start.toISOString()} AND ${dateRange.end.toISOString()}`;
     }
 
-    // Get appointments with related data
+    // Get appointments with related data using proper aliases
     const appointmentsWithCount = await db
       .select({
         appointment: appointments,
         patient: {
           id: patients.id,
           userId: patients.userId,
-          name: users.name,
-          email: users.email,
+          name: patientUsers.name,
+          email: patientUsers.email,
         },
         doctor: {
           id: doctors.id,
           userId: doctors.userId,
-          name: users.name,
+          name: doctorUsers.name,
           specialty: doctors.specialty,
         },
         total: sql<number>`count(*) over()`,
       })
       .from(appointments)
       .leftJoin(patients, eq(appointments.patientId, patients.id))
-      .leftJoin(users, eq(patients.userId, users.id))
+      .leftJoin(patientUsers, eq(patients.userId, patientUsers.id))
       .leftJoin(doctors, eq(appointments.doctorId, doctors.id))
       .leftJoin(doctorUsers, eq(doctors.userId, doctorUsers.id))
       .where(whereClause)
@@ -305,13 +308,13 @@ export async function updateAppointment(
       throw new Error("Unauthorized");
     }
 
-    const user = await db
+    const currentUser = await db
       .select()
-      .from(users)
-      .where(eq(users.id, session.user.id))
+      .from(user)
+      .where(eq(user.id, session.user.id))
       .limit(1);
 
-    if (!user[0]) {
+    if (!currentUser[0]) {
       throw new Error("User not found");
     }
 
@@ -333,7 +336,7 @@ export async function updateAppointment(
     }
 
     // Access control
-    if (user[0].role === "patient") {
+    if (currentUser[0].role === "patient") {
       // Patients can only update their own appointments
       if (appointment[0].patient?.userId !== session.user.id) {
         throw new Error("You can only update your own appointments");
@@ -353,7 +356,7 @@ export async function updateAppointment(
       if (hasUnauthorizedFields) {
         throw new Error("You can only update reason and symptoms");
       }
-    } else if (user[0].role === "doctor") {
+    } else if (currentUser[0].role === "doctor") {
       // Doctors can only update their own appointments
       if (appointment[0].doctor?.userId !== session.user.id) {
         throw new Error("You can only update your own appointments");
@@ -402,13 +405,13 @@ export async function cancelAppointment(
       throw new Error("Unauthorized");
     }
 
-    const user = await db
+    const currentUser = await db
       .select()
-      .from(users)
-      .where(eq(users.id, session.user.id))
+      .from(user)
+      .where(eq(user.id, session.user.id))
       .limit(1);
 
-    if (!user[0]) {
+    if (!currentUser[0]) {
       throw new Error("User not found");
     }
 
@@ -430,11 +433,11 @@ export async function cancelAppointment(
     }
 
     // Access control
-    if (user[0].role === "patient") {
+    if (currentUser[0].role === "patient") {
       if (appointment[0].patient?.userId !== session.user.id) {
         throw new Error("You can only cancel your own appointments");
       }
-    } else if (user[0].role === "doctor") {
+    } else if (currentUser[0].role === "doctor") {
       if (appointment[0].doctor?.userId !== session.user.id) {
         throw new Error("You can only cancel your own appointments");
       }
@@ -478,13 +481,13 @@ export async function getAppointmentDetails(appointmentId: number) {
       throw new Error("Unauthorized");
     }
 
-    const user = await db
+    const currentUser = await db
       .select()
-      .from(users)
-      .where(eq(users.id, session.user.id))
+      .from(user)
+      .where(eq(user.id, session.user.id))
       .limit(1);
 
-    if (!user[0]) {
+    if (!currentUser[0]) {
       throw new Error("User not found");
     }
 
@@ -495,15 +498,15 @@ export async function getAppointmentDetails(appointmentId: number) {
         patient: {
           id: patients.id,
           userId: patients.userId,
-          name: users.name,
-          email: users.email,
+          name: patientUsers.name,
+          email: patientUsers.email,
           phone: patients.phone,
           dateOfBirth: patients.dateOfBirth,
         },
         doctor: {
           id: doctors.id,
           userId: doctors.userId,
-          name: users.name,
+          name: doctorUsers.name,
           specialty: doctors.specialty,
           licenseNumber: doctors.licenseNumber,
         },
@@ -523,11 +526,11 @@ export async function getAppointmentDetails(appointmentId: number) {
     const appointment = appointmentDetails[0];
 
     // Access control
-    if (user[0].role === "patient") {
+    if (currentUser[0].role === "patient") {
       if (appointment.patient?.userId !== session.user.id) {
         throw new Error("You can only view your own appointments");
       }
-    } else if (user[0].role === "doctor") {
+    } else if (currentUser[0].role === "doctor") {
       if (appointment.doctor?.userId !== session.user.id) {
         throw new Error("You can only view your own appointments");
       }

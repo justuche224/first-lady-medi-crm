@@ -1,3 +1,5 @@
+// TODO: Investigate data not adding up
+
 import React from "react";
 import { serverAuth } from "@/lib/server-auth";
 import { redirect } from "next/navigation";
@@ -19,6 +21,11 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import {
+  getDashboardStatistics,
+  getRecentActivities,
+  getDepartmentStats,
+} from "@/actions";
 
 const page = async () => {
   const user = await serverAuth();
@@ -28,6 +35,45 @@ const page = async () => {
   if (user.role !== "admin") {
     redirect("/dashboard");
   }
+
+  // Fetch live data from server actions
+  const [statsResult, activitiesResult, deptStatsResult] = await Promise.all([
+    getDashboardStatistics(),
+    getRecentActivities(6),
+    getDepartmentStats(),
+  ]);
+
+  const liveStats =
+    statsResult.success && statsResult.statistics
+      ? statsResult.statistics
+      : {
+          users: {
+            totalPatients: 0,
+            totalStaff: 0,
+            totalDoctors: 0,
+            newUsersThisMonth: 0,
+          },
+          appointments: { todayAppointments: 0, completedAppointments: 0 },
+          departments: { totalDepartments: 0 },
+          feedback: { pendingFeedback: 0 },
+        };
+
+  const liveActivities =
+    activitiesResult.success && activitiesResult.activities
+      ? activitiesResult.activities
+      : [];
+
+  const liveDepartmentStats =
+    deptStatsResult.success && deptStatsResult.departments
+      ? deptStatsResult.departments
+      : [
+          {
+            name: "No departments found",
+            patients: 0,
+            satisfaction: 0,
+            appointments: 0,
+          },
+        ];
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -57,75 +103,26 @@ const page = async () => {
     }
   };
 
-  const mockStats = {
-    totalPatients: 1247,
-    totalStaff: 89,
-    todayAppointments: 76,
-    patientSatisfaction: 94.2,
-    monthlyGrowth: 12.5,
-    pendingFeedback: 23,
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60)
+    );
+
+    if (diffInMinutes < 1) return "Just now";
+    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
+
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24)
+      return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
   };
 
-  const mockRecentActivities = [
-    {
-      id: 1,
-      type: "new_patient",
-      message: "New patient registration: Emily Davis",
-      time: "5 minutes ago",
-      priority: "low",
-    },
-    {
-      id: 2,
-      type: "appointment",
-      message: "Appointment cancelled by Robert Johnson",
-      time: "12 minutes ago",
-      priority: "medium",
-    },
-    {
-      id: 3,
-      type: "feedback",
-      message: "Negative feedback received from patient #1234",
-      time: "25 minutes ago",
-      priority: "high",
-    },
-    {
-      id: 4,
-      type: "staff",
-      message: "Dr. Sarah Wilson added to Cardiology department",
-      time: "1 hour ago",
-      priority: "low",
-    },
-  ];
-
-  const mockDepartmentStats = [
-    {
-      name: "Cardiology",
-      patients: 156,
-      satisfaction: 96.2,
-      appointments: 23,
-    },
-    {
-      name: "General Medicine",
-      patients: 234,
-      satisfaction: 93.8,
-      appointments: 31,
-    },
-    {
-      name: "Pediatrics",
-      patients: 189,
-      satisfaction: 97.1,
-      appointments: 19,
-    },
-    {
-      name: "Orthopedics",
-      patients: 142,
-      satisfaction: 92.4,
-      appointments: 17,
-    },
-  ];
-
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+    <div className="flex flex-1 flex-col gap-4 p-4 pt-0 container mx-auto">
       <div className="bg-gradient-to-r bg-primary p-6 rounded-xl">
         <div className="flex items-center space-x-4">
           <div className="bg-primary-foreground p-3 rounded-full">
@@ -147,7 +144,7 @@ const page = async () => {
             <Users className="h-8 w-8 text-blue-600" />
             <div>
               <p className="text-2xl font-bold text-blue-600">
-                {mockStats.totalPatients.toLocaleString()}
+                {(liveStats.users.totalPatients || 0).toLocaleString()}
               </p>
               <p className="text-sm">Patients</p>
             </div>
@@ -156,7 +153,10 @@ const page = async () => {
             <Activity className="h-8 w-8 text-teal-600" />
             <div>
               <p className="text-2xl font-bold text-teal-600">
-                {mockStats.totalStaff}
+                {(
+                  (liveStats.users.totalDoctors || 0) +
+                  (liveStats.users.totalStaff || 0)
+                ).toLocaleString()}
               </p>
               <p className="text-sm">Staff</p>
             </div>
@@ -168,18 +168,18 @@ const page = async () => {
             <Calendar className="h-8 w-8 text-green-600" />
             <div>
               <p className="text-2xl font-bold text-green-600">
-                {mockStats.todayAppointments}
+                {liveStats.appointments.todayAppointments || 0}
               </p>
-              <p className="text-sm">Appointments</p>
+              <p className="text-sm">Today&apos;s Appointments</p>
             </div>
           </div>
           <div className="flex items-center gap-4 bg-card p-4 rounded-lg md:w-1/2 shadow-md border">
             <TrendingUp className="h-8 w-8 text-purple-600" />
             <div>
               <p className="text-2xl font-bold text-purple-600">
-                {mockStats.patientSatisfaction}%
+                {liveStats.feedback.pendingFeedback || 0}
               </p>
-              <p className="text-sm">Satisfaction</p>
+              <p className="text-sm">Pending Feedback</p>
             </div>
           </div>
         </div>
@@ -203,27 +203,34 @@ const page = async () => {
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
-            {mockRecentActivities.map((activity) => (
-              <div
-                key={activity.id}
-                className="flex items-center space-x-4 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-300"
-              >
-                <div className="flex-shrink-0">
-                  {getActivityIcon(activity.type)}
+            {liveActivities && liveActivities.length > 0 ? (
+              liveActivities.map((activity) => (
+                <div
+                  key={`${activity.type}-${activity.id}`}
+                  className="flex items-center space-x-4 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-300"
+                >
+                  <div className="flex-shrink-0">
+                    {getActivityIcon(activity.type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      {activity.message}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {formatTimeAgo(activity.time)}
+                    </p>
+                  </div>
+                  <Badge className={getPriorityColor(activity.priority)}>
+                    {activity.priority}
+                  </Badge>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                    {activity.message}
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {activity.time}
-                  </p>
-                </div>
-                <Badge className={getPriorityColor(activity.priority)}>
-                  {activity.priority}
-                </Badge>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <Activity className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No recent activities found</p>
               </div>
-            ))}
+            )}
           </CardContent>
         </Card>
 
@@ -235,28 +242,49 @@ const page = async () => {
           </CardHeader>
           <CardContent className="space-y-3">
             <Button className="w-full justify-start" variant="outline" asChild>
-              <Link href="/dashboard/admin/patients">
+              <Link href="/admin/patients">
                 <Users className="mr-2 h-4 w-4" />
                 Manage Patients
               </Link>
             </Button>
 
             <Button className="w-full justify-start" variant="outline" asChild>
-              <Link href="/dashboard/admin/staff">
+              <Link href="/admin/staffs">
                 <Activity className="mr-2 h-4 w-4" />
-                Manage Staff
+                Manage Staffs
               </Link>
             </Button>
 
             <Button className="w-full justify-start" variant="outline" asChild>
-              <Link href="/dashboard/admin/reports">
+              <Link href="/admin/doctors">
+                <Users className="mr-2 h-4 w-4" />
+                Manage Doctors
+              </Link>
+            </Button>
+
+            <Button className="w-full justify-start" variant="outline" asChild>
+              <Link href="/admin/departments">
+                <Users className="mr-2 h-4 w-4" />
+                Manage Departments
+              </Link>
+            </Button>
+
+            <Button className="w-full justify-start" variant="outline" asChild>
+              <Link href="/admin/appointments">
+                <Calendar className="mr-2 h-4 w-4" />
+                Manage Appointments
+              </Link>
+            </Button>
+
+            <Button className="w-full justify-start" variant="outline" asChild>
+              <Link href="/admin/reports">
                 <BarChart3 className="mr-2 h-4 w-4" />
                 View Reports
               </Link>
             </Button>
 
             <Button className="w-full justify-start" variant="outline" asChild>
-              <Link href="/dashboard/admin/settings">
+              <Link href="/admin/settings">
                 <Activity className="mr-2 h-4 w-4" />
                 System Settings
               </Link>
@@ -275,19 +303,17 @@ const page = async () => {
             <CardDescription>Performance metrics by department</CardDescription>
           </div>
           <Button variant="outline" size="sm" asChild>
-            <Link href="/dashboard/admin/reports">Detailed Reports</Link>
+            <Link href="/admin/reports">Detailed Reports</Link>
           </Button>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {mockDepartmentStats.map((dept) => (
+            {liveDepartmentStats.map((dept, index) => (
               <div
-                key={dept.name}
+                key={`${dept.name}-${index}`}
                 className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
               >
-                <h4 className="font-semibold mb-3">
-                  {dept.name}
-                </h4>
+                <h4 className="font-semibold mb-3">{dept.name}</h4>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="">Patients:</span>
@@ -306,9 +332,7 @@ const page = async () => {
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="">
-                      Today&apos;s Appointments:
-                    </span>
+                    <span className="">Appointments:</span>
                     <span className="font-medium">{dept.appointments}</span>
                   </div>
                 </div>

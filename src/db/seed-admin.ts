@@ -9,6 +9,7 @@ async function main() {
         email: "john.doe@example.com",
         password: "password1234",
         image: "https://example.com/image.png",
+        role: "admin",
       },
     });
     console.log(data);
