@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/components/admin/app-sidebar";
+import { AppSidebar } from "@/components/patient/app-sidebar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -33,13 +33,13 @@ export default function PatientLayout({
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    Building Your Application
+                  <BreadcrumbLink href="/patient">
+                    Patient Portal
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+                  <BreadcrumbPage>Dashboard</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>

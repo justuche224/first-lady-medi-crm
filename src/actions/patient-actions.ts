@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { user as users, patients} from "@/db/schema";
+import { user as users, patients } from "@/db/schema";
 import { eq, sql, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -336,6 +336,64 @@ export async function togglePatientBan(
     return { success: true };
   } catch (error) {
     console.error("Error toggling patient ban:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+/**
+ * Get current patient information for the logged-in user
+ *
+ * Used by patients to access their own patient record information.
+ */
+export async function getCurrentPatient() {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user?.id) {
+      throw new Error("Unauthorized");
+    }
+
+    const currentUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, session.user.id))
+      .limit(1);
+
+    if (!currentUser[0]) {
+      throw new Error("User not found");
+    }
+
+    if (currentUser[0].role !== "patient") {
+      throw new Error("Only patients can access this function");
+    }
+
+    // Get patient record
+    const patient = await db
+      .select({
+        patient: patients,
+        user: {
+          id: users.id,
+          name: users.name,
+          email: users.email,
+        },
+      })
+      .from(patients)
+      .leftJoin(users, eq(patients.userId, users.id))
+      .where(eq(patients.userId, session.user.id))
+      .limit(1);
+
+    if (!patient[0]) {
+      throw new Error("Patient record not found");
+    }
+
+    return { success: true, patient: patient[0] };
+  } catch (error) {
+    console.error("Error fetching current patient:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

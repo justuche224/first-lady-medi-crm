@@ -172,6 +172,85 @@ export async function getDoctors(page = 1, limit = 10, search?: string) {
   }
 }
 
+/**
+ * Get available doctors for appointment booking
+ *
+ * This function is accessible to patients and returns only essential doctor information
+ * needed for appointment booking (no sensitive admin data).
+ */
+export async function getAvailableDoctorsForBooking(
+  page = 1,
+  limit = 50,
+  search?: string
+) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user?.id) {
+      throw new Error("Unauthorized");
+    }
+
+    const offset = (page - 1) * limit;
+
+    let whereClause = sql`true`;
+    if (search) {
+      whereClause = sql`(${users.name} ILIKE ${`%${search}%`} OR ${
+        doctors.specialty
+      } ILIKE ${`%${search}%`})`;
+    }
+
+    // Only get active, non-banned doctors for appointment booking
+    const doctorsWithCount = await db
+      .select({
+        id: doctors.id,
+        userId: users.id,
+        name: users.name,
+        email: users.email,
+        licenseNumber: doctors.licenseNumber,
+        specialty: doctors.specialty,
+        departmentId: doctors.departmentId,
+        departmentName: departments.name,
+        yearsOfExperience: doctors.yearsOfExperience,
+        consultationFee: doctors.consultationFee,
+        rating: doctors.rating,
+        total: sql<number>`count(*) over()`,
+      })
+      .from(doctors)
+      .innerJoin(users, eq(doctors.userId, users.id))
+      .leftJoin(departments, eq(doctors.departmentId, departments.id))
+      .where(
+        and(eq(users.role, "doctor"), eq(users.banned, false), whereClause)
+      )
+      .orderBy(users.name)
+      .limit(limit)
+      .offset(offset);
+
+    const total = doctorsWithCount[0]?.total || 0;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      success: true,
+      doctors: doctorsWithCount,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching available doctors:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
 export async function getDoctorDetails(doctorId: number) {
   try {
     await verifyAdminAccess();

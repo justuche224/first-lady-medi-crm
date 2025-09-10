@@ -1,27 +1,27 @@
-import { Figtree } from "next/font/google";
-import { Instrument_Serif } from "next/font/google";
+// import { Figtree } from "next/font/google";
+// import { Instrument_Serif } from "next/font/google";
 import type React from "react";
 import type { Metadata } from "next";
-import { GeistMono } from "geist/font/mono";
+// import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import NextTopLoader from "nextjs-toploader";
 import { ThemeProvider } from "@/components/theme-provider";
 
-const figtree = Figtree({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-figtree",
-  display: "swap",
-});
+// const figtree = Figtree({
+//   subsets: ["latin"],
+//   weight: ["300", "400", "500", "600", "700"],
+//   variable: "--font-figtree",
+//   display: "swap",
+// });
 
-const instrumentSerif = Instrument_Serif({
-  subsets: ["latin"],
-  weight: ["400"],
-  style: ["normal", "italic"],
-  variable: "--font-instrument-serif",
-  display: "swap",
-});
+// const instrumentSerif = Instrument_Serif({
+//   subsets: ["latin"],
+//   weight: ["400"],
+//   style: ["normal", "italic"],
+//   variable: "--font-instrument-serif",
+//   display: "swap",
+// });
 
 export const metadata: Metadata = {
   title: "v0 App",
@@ -37,16 +37,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <style>{`
+        {/* <style>{`
             html {
               font-family: ${figtree.style.fontFamily};
               --font-sans: ${figtree.variable};
               --font-mono: ${GeistMono.variable};
               --font-instrument-serif: ${instrumentSerif.variable};
             }
-        `}</style>
+        `}</style> */}
       </head>
-      <body className={`${figtree.variable} ${instrumentSerif.variable}`}>
+      {/* <body className={`${figtree.variable} ${instrumentSerif.variable}`}> */}
+      <body>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

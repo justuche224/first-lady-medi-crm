@@ -8,17 +8,15 @@
 "use server";
 
 import { db } from "@/db";
-import {
-  messages,
-  user as users,
-  user as senders,
-  user as recipients,
-  feedback,
-} from "@/db/schema";
+import { messages, user, feedback } from "@/db/schema";
 import { eq, and, sql, desc, or } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { alias } from "drizzle-orm/pg-core";
+
+const senders = alias(user, "senders");
+const recipients = alias(user, "recipients");
 
 // Types
 export interface SendMessageData {
@@ -50,8 +48,8 @@ export async function sendMessage(messageData: SendMessageData) {
     // Verify recipient exists
     const recipient = await db
       .select()
-      .from(users)
-      .where(eq(users.id, messageData.recipientId))
+      .from(user)
+      .where(eq(user.id, messageData.recipientId))
       .limit(1);
 
     if (!recipient[0]) {
@@ -156,14 +154,14 @@ export async function getMessages(
       .select({
         message: messages,
         sender: {
-          id: users.id,
-          name: users.name,
-          role: users.role,
+          id: senders.id,
+          name: senders.name,
+          role: senders.role,
         },
         recipient: {
-          id: users.id,
-          name: users.name,
-          role: users.role,
+          id: recipients.id,
+          name: recipients.name,
+          role: recipients.role,
         },
         total: sql<number>`count(*) over()`,
       })

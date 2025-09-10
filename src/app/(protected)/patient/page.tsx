@@ -1,6 +1,7 @@
 import React from "react";
 import { serverAuth } from "@/lib/server-auth";
 import { redirect } from "next/navigation";
+import { getPatientDashboard } from "@/actions";
 import {
   Calendar,
   Clock,
@@ -23,14 +24,78 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 
+interface Activity {
+  id: number;
+  type: string;
+  message: string;
+  timestamp: Date;
+  priority: string;
+  time: string;
+}
+
+interface Appointment {
+  id: number;
+  doctor: string;
+  specialty: string;
+  date: string;
+  time: string;
+  type: string;
+}
+
+interface DashboardStats {
+  upcomingAppointments: number;
+  pendingResults: number;
+  activeMedications: number;
+  unreadMessages: number;
+  healthScore: number;
+}
+
+interface DashboardData {
+  stats: DashboardStats;
+  recentActivities: Activity[];
+  upcomingAppointments: Appointment[];
+}
+
 const page = async () => {
   const user = await serverAuth();
   if (!user) {
     redirect("/");
   }
-  // if (user.role !== "patient") {
-  //   redirect("/dashboard");
-  // }
+
+  // Fetch actual dashboard data
+  const dashboardResult = await getPatientDashboard();
+
+  if (!dashboardResult.success) {
+    return (
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-0 container mx-auto">
+        <div className="bg-gradient-to-r bg-primary p-6 rounded-xl">
+          <div className="flex items-center space-x-4">
+            <div className="bg-primary-foreground p-3 rounded-full">
+              <Heart className="h-8 w-8" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">Patient Dashboard</h1>
+              <p className="text-primary-foreground mt-1">
+                Welcome back, {user.name}
+              </p>
+            </div>
+          </div>
+        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-red-600">
+              Error loading dashboard: {dashboardResult.error}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const dashboardData = dashboardResult.data as DashboardData;
+  const stats = dashboardData.stats;
+  const recentActivities = dashboardData.recentActivities;
+  const upcomingAppointments = dashboardData.upcomingAppointments;
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -60,75 +125,8 @@ const page = async () => {
     }
   };
 
-  const mockPatientStats = {
-    upcomingAppointments: 3,
-    pendingResults: 2,
-    activeMedications: 4,
-    nextAppointment: "2024-01-15",
-    healthScore: 87,
-    messages: 5,
-  };
-
-  const mockRecentActivities = [
-    {
-      id: 1,
-      type: "appointment",
-      message: "Upcoming appointment with Dr. Smith - Cardiology",
-      time: "Tomorrow 2:00 PM",
-      priority: "normal",
-    },
-    {
-      id: 2,
-      type: "result",
-      message: "Blood test results are now available",
-      time: "2 hours ago",
-      priority: "urgent",
-    },
-    {
-      id: 3,
-      type: "medication",
-      message: "Prescription refill reminder - Lisinopril",
-      time: "1 day ago",
-      priority: "normal",
-    },
-    {
-      id: 4,
-      type: "message",
-      message: "New message from Dr. Johnson",
-      time: "2 days ago",
-      priority: "low",
-    },
-  ];
-
-  const mockUpcomingAppointments = [
-    {
-      id: 1,
-      doctor: "Dr. Sarah Smith",
-      specialty: "Cardiology",
-      date: "Jan 15, 2024",
-      time: "2:00 PM",
-      type: "Follow-up",
-    },
-    {
-      id: 2,
-      doctor: "Dr. Michael Johnson",
-      specialty: "General Medicine",
-      date: "Jan 22, 2024",
-      time: "10:30 AM",
-      type: "Annual Checkup",
-    },
-    {
-      id: 3,
-      doctor: "Dr. Emily Davis",
-      specialty: "Dermatology",
-      date: "Feb 5, 2024",
-      time: "3:15 PM",
-      type: "Consultation",
-    },
-  ];
-
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+    <div className="flex flex-1 flex-col gap-4 p-4 pt-0 container mx-auto">
       <div className="bg-gradient-to-r bg-primary p-6 rounded-xl">
         <div className="flex items-center space-x-4">
           <div className="bg-primary-foreground p-3 rounded-full">
@@ -150,7 +148,7 @@ const page = async () => {
             <Calendar className="h-8 w-8 text-blue-600" />
             <div>
               <p className="text-2xl font-bold text-blue-600">
-                {mockPatientStats.upcomingAppointments}
+                {stats.upcomingAppointments}
               </p>
               <p className="text-sm">Upcoming Appointments</p>
             </div>
@@ -159,7 +157,7 @@ const page = async () => {
             <FileText className="h-8 w-8 text-orange-600" />
             <div>
               <p className="text-2xl font-bold text-orange-600">
-                {mockPatientStats.pendingResults}
+                {stats.pendingResults}
               </p>
               <p className="text-sm">Pending Results</p>
             </div>
@@ -171,7 +169,7 @@ const page = async () => {
             <Pill className="h-8 w-8 text-green-600" />
             <div>
               <p className="text-2xl font-bold text-green-600">
-                {mockPatientStats.activeMedications}
+                {stats.activeMedications}
               </p>
               <p className="text-sm">Active Medications</p>
             </div>
@@ -180,7 +178,7 @@ const page = async () => {
             <TrendingUp className="h-8 w-8 text-purple-600" />
             <div>
               <p className="text-2xl font-bold text-purple-600">
-                {mockPatientStats.healthScore}%
+                {stats.healthScore}%
               </p>
               <p className="text-sm">Health Score</p>
             </div>
@@ -201,32 +199,42 @@ const page = async () => {
                 Latest updates on your health and appointments
               </CardDescription>
             </div>
-            <Button variant="outline" size="sm">
-              View All
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/patient/medical-records">View All</Link>
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
-            {mockRecentActivities.map((activity) => (
-              <div
-                key={activity.id}
-                className="flex items-center space-x-4 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-300"
-              >
-                <div className="flex-shrink-0">
-                  {getActivityIcon(activity.type)}
+            {recentActivities.length > 0 ? (
+              recentActivities.map((activity: Activity) => (
+                <div
+                  key={`${activity.type}-${activity.id}`}
+                  className="flex items-center space-x-4 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-300"
+                >
+                  <div className="flex-shrink-0">
+                    {getActivityIcon(activity.type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      {activity.message}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {activity.time}
+                    </p>
+                  </div>
+                  <Badge className={getPriorityColor(activity.priority)}>
+                    {activity.priority}
+                  </Badge>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                    {activity.message}
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {activity.time}
-                  </p>
-                </div>
-                <Badge className={getPriorityColor(activity.priority)}>
-                  {activity.priority}
-                </Badge>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Clock className="h-8 w-8 mx-auto mb-2" />
+                <p>No recent activities</p>
+                <p className="text-sm">
+                  Your recent activities will appear here
+                </p>
               </div>
-            ))}
+            )}
           </CardContent>
         </Card>
 
@@ -238,28 +246,28 @@ const page = async () => {
           </CardHeader>
           <CardContent className="space-y-3">
             <Button className="w-full justify-start" variant="outline" asChild>
-              <Link href="/dashboard/patient/appointments">
+              <Link href="/patient/appointments/book">
                 <Calendar className="mr-2 h-4 w-4" />
                 Book Appointment
               </Link>
             </Button>
 
             <Button className="w-full justify-start" variant="outline" asChild>
-              <Link href="/dashboard/patient/records">
+              <Link href="/patient/medical-records">
                 <FileText className="mr-2 h-4 w-4" />
                 Medical Records
               </Link>
             </Button>
 
             <Button className="w-full justify-start" variant="outline" asChild>
-              <Link href="/dashboard/patient/medications">
+              <Link href="/patient/medications">
                 <Pill className="mr-2 h-4 w-4" />
                 Medications
               </Link>
             </Button>
 
             <Button className="w-full justify-start" variant="outline" asChild>
-              <Link href="/dashboard/patient/messages">
+              <Link href="/patient/messages">
                 <MessageSquare className="mr-2 h-4 w-4" />
                 Messages
               </Link>
@@ -281,39 +289,54 @@ const page = async () => {
             </CardDescription>
           </div>
           <Button variant="outline" size="sm" asChild>
-            <Link href="/dashboard/patient/appointments">View All</Link>
+            <Link href="/patient/appointments">View All</Link>
           </Button>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {mockUpcomingAppointments.map((appointment) => (
-              <div
-                key={appointment.id}
-                className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex items-center space-x-2 mb-3">
-                  <User className="h-4 w-4 text-gray-600" />
-                  <h4 className="font-semibold">{appointment.doctor}</h4>
+            {upcomingAppointments.length > 0 ? (
+              upcomingAppointments.map((appointment: Appointment) => (
+                <div
+                  key={appointment.id}
+                  className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center space-x-2 mb-3">
+                    <User className="h-4 w-4 text-gray-600" />
+                    <h4 className="font-semibold">{appointment.doctor}</h4>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {appointment.specialty}
+                  </p>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span>Date:</span>
+                      <span className="font-medium">{appointment.date}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Time:</span>
+                      <span className="font-medium">{appointment.time}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Type:</span>
+                      <span className="font-medium">{appointment.type}</span>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-600 mb-2">
-                  {appointment.specialty}
+              ))
+            ) : (
+              <div className="col-span-full text-center py-8 text-gray-500">
+                <Calendar className="h-8 w-8 mx-auto mb-2" />
+                <p>No upcoming appointments</p>
+                <p className="text-sm">
+                  Book your first appointment to get started
                 </p>
-                <div className="space-y-1 text-sm">
-                  <div className="flex justify-between">
-                    <span>Date:</span>
-                    <span className="font-medium">{appointment.date}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Time:</span>
-                    <span className="font-medium">{appointment.time}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Type:</span>
-                    <span className="font-medium">{appointment.type}</span>
-                  </div>
-                </div>
+                <Button className="mt-4" asChild>
+                  <Link href="/patient/appointments/book">
+                    Book Appointment
+                  </Link>
+                </Button>
               </div>
-            ))}
+            )}
           </div>
         </CardContent>
       </Card>

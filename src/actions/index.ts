@@ -105,6 +105,7 @@ export {
   deleteDoctor,
   toggleDoctorBan,
   getDoctorDetails,
+  getAvailableDoctorsForBooking,
   type CreateDoctorData,
   type UpdateDoctorData,
 } from "./doctor-actions";
@@ -117,6 +118,7 @@ export {
   deletePatient,
   togglePatientBan,
   getPatientDetails,
+  getCurrentPatient,
   type CreatePatientData,
   type UpdatePatientData,
 } from "./patient-actions";
@@ -147,3 +149,15 @@ export {
   deleteReport,
   type GenerateReportData,
 } from "./report-actions";
+
+// Patient Profile Management Actions (Patient Self-Service)
+export {
+  getPatientProfile,
+  updatePatientProfile,
+  getPatientHealthSummary,
+  getPatientDashboard,
+  updateNotificationPreferences,
+  requestAccountDeletion,
+  exportPatientData,
+  type UpdatePatientProfileData,
+} from "./patient-profile-actions";

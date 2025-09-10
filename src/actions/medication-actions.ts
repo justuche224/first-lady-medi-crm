@@ -10,9 +10,7 @@
 import { db } from "@/db";
 import {
   medications,
-  user as users,
-  user as doctorUsers,
-  user as patientUsers,
+  user,
   patients,
   doctors,
   appointments,
@@ -21,6 +19,11 @@ import { eq, and, sql, desc } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { alias } from "drizzle-orm/pg-core";
+
+// Create proper aliases for the user table
+const patientUsers = alias(user, 'patientUsers');
+const doctorUsers = alias(user, 'doctorUsers');
 
 // Types
 export interface CreateMedicationData {
@@ -70,13 +73,13 @@ export async function prescribeMedication(
       throw new Error("Unauthorized");
     }
 
-    const user = await db
+    const userData = await db
       .select()
-      .from(users)
-      .where(eq(users.id, session.user.id))
+      .from(user)
+      .where(eq(user.id, session.user.id))
       .limit(1);
 
-    if (!user[0] || user[0].role !== "doctor") {
+    if (!userData[0] || userData[0].role !== "doctor") {
       throw new Error("Only doctors can prescribe medications");
     }
 
@@ -177,13 +180,13 @@ export async function getMedications(
       throw new Error("Unauthorized");
     }
 
-    const user = await db
+    const userData = await db
       .select()
-      .from(users)
-      .where(eq(users.id, session.user.id))
+      .from(user)
+      .where(eq(user.id, session.user.id))
       .limit(1);
 
-    if (!user[0]) {
+    if (!userData[0]) {
       throw new Error("User not found");
     }
 
@@ -192,7 +195,7 @@ export async function getMedications(
     // Build where clause based on user role
     let whereClause = sql`true`;
 
-    if (user[0].role === "patient") {
+    if (userData[0].role === "patient") {
       // Patients can only see their own medications
       const patient = await db
         .select()
@@ -205,7 +208,7 @@ export async function getMedications(
       }
 
       whereClause = sql`${medications.patientId} = ${patient[0].id}`;
-    } else if (user[0].role === "doctor") {
+    } else if (userData[0].role === "doctor") {
       // Doctors can see medications for their patients
       const doctor = await db
         .select()
@@ -257,12 +260,12 @@ export async function getMedications(
         patient: {
           id: patients.id,
           userId: patients.userId,
-          name: users.name,
+          name: user.name,
         },
         doctor: {
           id: doctors.id,
           userId: doctors.userId,
-          name: users.name,
+          name: user.name,
           specialty: doctors.specialty,
         },
         appointment: appointments,
@@ -270,7 +273,7 @@ export async function getMedications(
       })
       .from(medications)
       .leftJoin(patients, eq(medications.patientId, patients.id))
-      .leftJoin(users, eq(patients.userId, users.id))
+      .leftJoin(user, eq(patients.userId, user.id))
       .leftJoin(doctors, eq(medications.prescribedBy, doctors.id))
       .leftJoin(doctorUsers, eq(doctors.userId, doctorUsers.id))
       .leftJoin(appointments, eq(medications.appointmentId, appointments.id))
@@ -322,13 +325,13 @@ export async function updateMedication(
       throw new Error("Unauthorized");
     }
 
-    const user = await db
+    const userData = await db
       .select()
-      .from(users)
-      .where(eq(users.id, session.user.id))
+      .from(user)
+      .where(eq(user.id, session.user.id))
       .limit(1);
 
-    if (!user[0] || user[0].role !== "doctor") {
+    if (!userData[0] || userData[0].role !== "doctor") {
       throw new Error("Only doctors can update medications");
     }
 
@@ -397,13 +400,13 @@ export async function refillMedication(medicationId: number) {
       throw new Error("Unauthorized");
     }
 
-    const user = await db
+    const userData = await db
       .select()
-      .from(users)
-      .where(eq(users.id, session.user.id))
+      .from(user)
+      .where(eq(user.id, session.user.id))
       .limit(1);
 
-    if (!user[0]) {
+    if (!userData[0]) {
       throw new Error("User not found");
     }
 
@@ -425,11 +428,11 @@ export async function refillMedication(medicationId: number) {
     }
 
     // Access control
-    if (user[0].role === "patient") {
+    if (userData[0].role === "patient") {
       if (medication[0].patient?.userId !== session.user.id) {
         throw new Error("You can only refill your own medications");
       }
-    } else if (user[0].role === "doctor") {
+    } else if (userData[0].role === "doctor") {
       if (medication[0].doctor?.userId !== session.user.id) {
         throw new Error("You can only refill medications you prescribed");
       }
@@ -484,13 +487,13 @@ export async function discontinueMedication(
       throw new Error("Unauthorized");
     }
 
-    const user = await db
+    const userData = await db
       .select()
-      .from(users)
-      .where(eq(users.id, session.user.id))
+      .from(user)
+      .where(eq(user.id, session.user.id))
       .limit(1);
 
-    if (!user[0] || user[0].role !== "doctor") {
+    if (!userData[0] || userData[0].role !== "doctor") {
       throw new Error("Only doctors can discontinue medications");
     }
 
@@ -560,13 +563,13 @@ export async function getMedicationDetails(medicationId: number) {
       throw new Error("Unauthorized");
     }
 
-    const user = await db
+    const userData = await db
       .select()
-      .from(users)
-      .where(eq(users.id, session.user.id))
+      .from(user)
+      .where(eq(user.id, session.user.id))
       .limit(1);
 
-    if (!user[0]) {
+    if (!userData[0]) {
       throw new Error("User not found");
     }
 
@@ -577,14 +580,14 @@ export async function getMedicationDetails(medicationId: number) {
         patient: {
           id: patients.id,
           userId: patients.userId,
-          name: users.name,
+          name: user.name,
           dateOfBirth: patients.dateOfBirth,
           phone: patients.phone,
         },
         doctor: {
           id: doctors.id,
           userId: doctors.userId,
-          name: users.name,
+          name: user.name,
           specialty: doctors.specialty,
           licenseNumber: doctors.licenseNumber,
         },
@@ -592,7 +595,7 @@ export async function getMedicationDetails(medicationId: number) {
       })
       .from(medications)
       .leftJoin(patients, eq(medications.patientId, patients.id))
-      .leftJoin(users, eq(patients.userId, users.id))
+      .leftJoin(user, eq(patients.userId, user.id))
       .leftJoin(doctors, eq(medications.prescribedBy, doctors.id))
       .leftJoin(doctorUsers, eq(doctors.userId, doctorUsers.id))
       .leftJoin(appointments, eq(medications.appointmentId, appointments.id))
@@ -606,11 +609,11 @@ export async function getMedicationDetails(medicationId: number) {
     const medication = medicationDetails[0];
 
     // Access control
-    if (user[0].role === "patient") {
+    if (userData[0].role === "patient") {
       if (medication.patient?.userId !== session.user.id) {
         throw new Error("You can only view your own medications");
       }
-    } else if (user[0].role === "doctor") {
+    } else if (userData[0].role === "doctor") {
       if (medication.doctor?.userId !== session.user.id) {
         throw new Error("You can only view medications you prescribed");
       }
@@ -641,19 +644,19 @@ export async function getMedicationsRequiringAttention() {
       throw new Error("Unauthorized");
     }
 
-    const user = await db
+    const userData = await db
       .select()
-      .from(users)
-      .where(eq(users.id, session.user.id))
+      .from(user)
+      .where(eq(user.id, session.user.id))
       .limit(1);
 
-    if (!user[0]) {
+    if (!userData[0]) {
       throw new Error("User not found");
     }
 
     let patientIdFilter = sql`true`;
 
-    if (user[0].role === "patient") {
+    if (userData[0].role === "patient") {
       const patient = await db
         .select()
         .from(patients)
@@ -677,10 +680,10 @@ export async function getMedicationsRequiringAttention() {
         medication: medications,
         patient: {
           id: patients.id,
-          name: users.name,
+          name: user.name,
         },
         doctor: {
-          name: users.name,
+          name: user.name,
           specialty: doctors.specialty,
         },
       })

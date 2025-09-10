@@ -2,22 +2,25 @@
 
 import * as React from "react";
 import {
-  AudioWaveform,
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
+  Heart,
+  Calendar,
+  FileText,
+  Pill,
+  TestTube,
+  MessageSquare,
+  MessageCircle,
+  Bell,
+  Settings,
+  User,
+  Home,
+  Activity,
+  Shield,
 } from "lucide-react";
 
-import { NavMain } from "@/components/admin/nav-main";
-import { NavProjects } from "@/components/admin/nav-projects";
-import { NavUser } from "@/components/admin/nav-user";
-import { TeamSwitcher } from "@/components/admin/team-switcher";
+import { NavMain } from "@/components/patient/nav-main";
+import { NavProjects } from "@/components/patient/nav-projects";
+import { NavUser } from "@/components/patient/nav-user";
+import { TeamSwitcher } from "@/components/patient/team-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -26,132 +29,135 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-// This is sample data.
+// Patient portal navigation data
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "Patient Portal",
+    email: "patient@example.com",
+    avatar: "/avatars/patient.jpg",
   },
   teams: [
     {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
+      name: "My Health",
+      logo: Heart,
+      plan: "Patient",
     },
   ],
   navMain: [
     {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
+      title: "Overview",
+      url: "/patient",
+      icon: Home,
       isActive: true,
+    },
+    {
+      title: "My Profile",
+      url: "/patient/profile",
+      icon: User,
+    },
+    {
+      title: "Appointments",
+      url: "/patient/appointments",
+      icon: Calendar,
       items: [
         {
-          title: "History",
-          url: "#",
+          title: "Upcoming",
+          url: "/patient/appointments?status=scheduled",
         },
         {
-          title: "Starred",
-          url: "#",
+          title: "Past",
+          url: "/patient/appointments?status=completed",
         },
         {
-          title: "Settings",
-          url: "#",
+          title: "Book New",
+          url: "/patient/appointments/book",
         },
       ],
     },
     {
-      title: "Models",
-      url: "#",
-      icon: Bot,
+      title: "Medical Records",
+      url: "/patient/medical-records",
+      icon: FileText,
+    },
+    {
+      title: "Medications",
+      url: "/patient/medications",
+      icon: Pill,
       items: [
         {
-          title: "Genesis",
-          url: "#",
+          title: "Current",
+          url: "/patient/medications?status=active",
         },
         {
-          title: "Explorer",
-          url: "#",
+          title: "Past",
+          url: "/patient/medications?status=completed",
         },
         {
-          title: "Quantum",
-          url: "#",
+          title: "Refill Requests",
+          url: "/patient/medications/refills",
         },
       ],
     },
     {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
+      title: "Lab Results",
+      url: "/patient/lab-results",
+      icon: TestTube,
       items: [
         {
-          title: "Introduction",
-          url: "#",
+          title: "Recent",
+          url: "/patient/lab-results?status=completed",
         },
         {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
+          title: "Pending",
+          url: "/patient/lab-results?status=pending",
         },
       ],
     },
     {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
+      title: "Messages",
+      url: "/patient/messages",
+      icon: MessageSquare,
       items: [
         {
-          title: "General",
-          url: "#",
+          title: "Inbox",
+          url: "/patient/messages",
         },
         {
-          title: "Team",
-          url: "#",
+          title: "Sent",
+          url: "/patient/messages/sent",
         },
         {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
+          title: "Compose",
+          url: "/patient/messages/compose",
         },
       ],
+    },
+    {
+      title: "Feedback",
+      url: "/patient/feedback",
+      icon: MessageCircle,
     },
   ],
   projects: [
     {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
+      name: "Health Dashboard",
+      url: "/patient",
+      icon: Activity,
     },
     {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
+      name: "Notifications",
+      url: "/patient/notifications",
+      icon: Bell,
     },
     {
-      name: "Travel",
-      url: "#",
-      icon: Map,
+      name: "Privacy & Security",
+      url: "/patient/settings",
+      icon: Shield,
+    },
+    {
+      name: "Settings",
+      url: "/patient/settings",
+      icon: Settings,
     },
   ],
 };
