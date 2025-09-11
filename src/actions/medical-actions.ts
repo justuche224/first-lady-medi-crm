@@ -11,7 +11,6 @@ import { db } from "@/db";
 import {
   medicalRecords,
   user as users,
-  user as doctorUsers,
   patients,
   doctors,
   appointments,
@@ -20,6 +19,9 @@ import { eq, and, sql, desc } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { alias } from "drizzle-orm/pg-core";
+
+const doctorUsers = alias(users, 'doctorUsers');
 
 // Types
 export interface CreateMedicalRecordData {

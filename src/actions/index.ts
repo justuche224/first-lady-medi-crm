@@ -161,3 +161,20 @@ export {
   exportPatientData,
   type UpdatePatientProfileData,
 } from "./patient-profile-actions";
+
+// Doctor Dashboard Actions (Doctor Self-Service)
+export {
+  getCurrentDoctorProfile,
+  getDoctorDashboardStats,
+  getDoctorTodaySchedule,
+  getDoctorRecentActivities,
+  getDoctorPatients,
+  getDoctorColleagues,
+  getDoctorPatientDetails,
+  getDoctorPatientAppointments,
+  getDoctorPatientMedications,
+  getDoctorPatientLabResults,
+  getDoctorPatientVitalSigns,
+  getDoctorNotifications,
+  markDoctorNotificationAsRead,
+} from "./doctor-dashboard-actions";

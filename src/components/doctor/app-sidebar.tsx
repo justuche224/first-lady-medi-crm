@@ -2,22 +2,22 @@
 
 import * as React from "react";
 import {
-  AudioWaveform,
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
-  Map,
-  PieChart,
+  Stethoscope,
+  Users,
+  Calendar,
+  FileText,
+  TestTube,
+  MessageSquare,
+  Star,
+  BarChart3,
+  Building2,
   Settings2,
-  SquareTerminal,
 } from "lucide-react";
 
-import { NavMain } from "@/components/admin/nav-main";
-import { NavProjects } from "@/components/admin/nav-projects";
-import { NavUser } from "@/components/admin/nav-user";
-import { TeamSwitcher } from "@/components/admin/team-switcher";
+import { NavMain } from "@/components/doctor/nav-main";
+import { NavProjects } from "@/components/doctor/nav-projects";
+import { NavUser } from "@/components/doctor/nav-user";
+import { TeamSwitcher } from "@/components/doctor/team-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -26,90 +26,123 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-// This is sample data.
+// Doctor navigation data
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "Dr. John Smith",
+    email: "john.smith@hospital.com",
+    avatar: "/avatars/doctor.jpg",
   },
   teams: [
     {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
+      name: "Cardiology Dept",
+      logo: Stethoscope,
+      plan: "Department",
     },
     {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
+      name: "Medical Center",
+      logo: Building2,
+      plan: "Hospital",
     },
   ],
   navMain: [
     {
-      title: "Playground",
+      title: "Dashboard",
+      url: "/doctor",
+      icon: Stethoscope,
+      isActive: true,
+    },
+    {
+      title: "Patient Management",
       url: "#",
-      icon: SquareTerminal,
+      icon: Users,
       isActive: true,
       items: [
         {
-          title: "History",
-          url: "#",
+          title: "My Patients",
+          url: "/doctor/patients",
         },
         {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
+          title: "Patient Search",
+          url: "/doctor/patients?search=true",
         },
       ],
     },
     {
-      title: "Models",
+      title: "Appointments",
       url: "#",
-      icon: Bot,
+      icon: Calendar,
+      isActive: true,
       items: [
         {
-          title: "Genesis",
-          url: "#",
+          title: "Schedule",
+          url: "/doctor/appointments",
         },
         {
-          title: "Explorer",
-          url: "#",
+          title: "Today's Appointments",
+          url: "/doctor/appointments?filter=today",
         },
         {
-          title: "Quantum",
-          url: "#",
+          title: "Upcoming",
+          url: "/doctor/appointments?filter=upcoming",
         },
       ],
     },
     {
-      title: "Documentation",
+      title: "Clinical Documentation",
       url: "#",
-      icon: BookOpen,
+      icon: FileText,
+      isActive: true,
       items: [
         {
-          title: "Introduction",
-          url: "#",
+          title: "Medical Records",
+          url: "/doctor/medical-records",
         },
         {
-          title: "Get Started",
-          url: "#",
+          title: "Medications",
+          url: "/doctor/medications",
         },
         {
-          title: "Tutorials",
-          url: "#",
+          title: "Lab Orders",
+          url: "/doctor/lab-orders",
         },
         {
-          title: "Changelog",
-          url: "#",
+          title: "Lab Results",
+          url: "/doctor/lab-results",
+        },
+      ],
+    },
+    {
+      title: "Communication",
+      url: "#",
+      icon: MessageSquare,
+      items: [
+        {
+          title: "Messages",
+          url: "/doctor/messages",
+        },
+        {
+          title: "Patient Feedback",
+          url: "/doctor/feedback",
+        },
+        {
+          title: "Notifications",
+          url: "/doctor/notifications",
+        },
+      ],
+    },
+    {
+      title: "Reports & Analytics",
+      url: "#",
+      icon: BarChart3,
+      items: [
+        {
+          title: "Patient Reports",
+          url: "/doctor/reports",
+        },
+        {
+          title: "Department Stats",
+          url: "/doctor/department",
         },
       ],
     },
@@ -119,39 +152,31 @@ const data = {
       icon: Settings2,
       items: [
         {
-          title: "General",
-          url: "#",
+          title: "Profile",
+          url: "/doctor/profile",
         },
         {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
+          title: "Preferences",
+          url: "/doctor/settings",
         },
       ],
     },
   ],
   projects: [
     {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
+      name: "Recent Patients",
+      url: "/doctor/patients?filter=recent",
+      icon: Users,
     },
     {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
+      name: "Urgent Cases",
+      url: "/doctor/patients?filter=urgent",
+      icon: Star,
     },
     {
-      name: "Travel",
-      url: "#",
-      icon: Map,
+      name: "Lab Results",
+      url: "/doctor/lab-results?filter=pending",
+      icon: TestTube,
     },
   ],
 };
