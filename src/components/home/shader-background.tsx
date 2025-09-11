@@ -89,14 +89,14 @@ const ShaderBackground = React.memo(function ShaderBackground({
       <MeshGradient
         className="absolute inset-0 w-full h-full"
         colors={gradientColors1}
-        speed={0.05}
+        speed={0.1}
         // @ts-expect-error: works
         backgroundColor="#0f172a"
       />
       <MeshGradient
         className="absolute inset-0 w-full h-full opacity-60"
         colors={gradientColors2}
-        speed={0.05}
+        speed={0.1}
         // @ts-expect-error: works
         wireframe="true"
         backgroundColor="transparent"

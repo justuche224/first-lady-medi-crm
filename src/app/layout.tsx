@@ -24,9 +24,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 // });
 
 export const metadata: Metadata = {
-  title: "v0 App",
-  description: "Created with v0",
-  generator: "v0.app",
+  title: "City Gate Hospital",
+  description: "Providing the best healthcare services to our patients",
 };
 
 export default function RootLayout({

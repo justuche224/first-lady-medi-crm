@@ -20,7 +20,7 @@ export default function HeroContent() {
 
   return (
     <motion.main
-      className="absolute bottom-8 left-8 z-20 max-w-md shadow-2xl w-full max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:max-w-none max-sm:mx-auto"
+      className="md:absolute md:bottom-8 md:left-8 md:z-20 md:max-w-md md:shadow-2xl md:w-full relative bottom-0 left-0 max-w-none mx-0 w-full"
       variants={containerVariants}
       initial="hidden"
       animate="visible"

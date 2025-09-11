@@ -19,12 +19,12 @@ export default function PulsingCircle() {
 
   return (
     <motion.div
-      className="absolute bottom-8 right-8 z-30 max-lg:bottom-4 max-lg:right-4 max-sm:bottom-2 max-sm:right-2"
+      className="md:absolute md:bottom-8 md:right-8 md:z-30 relative bottom-0 right-0 mx-auto"
       variants={circleVariants}
       initial="hidden"
       animate="visible"
     >
-      <div className="relative w-20 h-20 flex items-center justify-center max-sm:w-16 max-sm:h-16">
+      <div className="relative w-20 h-20 flex items-center justify-center max-md:w-16 max-md:h-16">
         {/* Pulsing Border Circle */}
         <PulsingBorder
           colors={[

@@ -29,7 +29,7 @@ export default function HospitalInfo() {
 
   return (
     <motion.div
-      className="absolute right-8 top-1/2 -translate-y-1/2 z-20 max-w-md w-full max-lg:static max-lg:transform-none max-lg:mt-8 max-lg:mx-auto max-lg:px-8"
+      className="md:absolute md:right-8 md:top-1/2 md:-translate-y-1/2 md:z-20 md:max-w-md md:w-full relative right-0 top-0 transform-none max-w-none w-full"
       initial={{ opacity: 0, x: 50 }}
       animate={{
         opacity: 1,
@@ -41,7 +41,7 @@ export default function HospitalInfo() {
         },
       }}
     >
-      <div className="backdrop-blur-sm bg-white/10 rounded-2xl p-8 border border-white/20 shadow-2xl">
+      <div className="backdrop-blur-sm bg-white/10 rounded-2xl p-8 border border-white/20 shadow-2xl max-md:p-6 max-md:rounded-xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{
@@ -54,16 +54,16 @@ export default function HospitalInfo() {
           }}
           className="mb-8"
         >
-          <h1 className="text-4xl font-bold text-white mb-4 max-sm:text-3xl">
-            Welcome to MediCare Hospital
+          <h1 className="text-4xl font-bold text-white mb-4 max-md:text-2xl max-md:mb-3">
+            Welcome to City Gate Hospital
           </h1>
-          <p className="text-white/90 text-lg leading-relaxed max-sm:text-base">
-            Your trusted healthcare partner providing exceptional medical care
-            with compassion and cutting-edge technology.
+          <p className="text-white/90 text-lg leading-relaxed max-md:text-base max-md:leading-normal">
+            At City Gate Hospital, we are committed to providing the best
+            healthcare services to our patients.
           </p>
         </motion.div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 max-md:space-y-4">
           {features.map((feature) => (
             <motion.div
               key={feature.title}
@@ -91,10 +91,10 @@ export default function HospitalInfo() {
                 <feature.icon className="w-6 h-6 text-white" />
               </motion.div>
               <div>
-                <h3 className="text-white font-semibold text-lg mb-1">
+                <h3 className="text-white font-semibold text-lg mb-1 max-md:text-base">
                   {feature.title}
                 </h3>
-                <p className="text-white/80 text-sm leading-relaxed">
+                <p className="text-white/80 text-sm leading-relaxed max-md:text-xs">
                   {feature.description}
                 </p>
               </div>
@@ -112,9 +112,9 @@ export default function HospitalInfo() {
               ease: [0.25, 0.46, 0.45, 0.94],
             },
           }}
-          className="mt-8 pt-6 border-t border-white/20"
+          className="mt-8 pt-6 border-t border-white/20 max-md:mt-6 max-md:pt-4"
         >
-          <div className="flex items-center justify-between text-white/90 text-sm">
+          <div className="flex items-center justify-between text-white/90 text-sm max-md:flex-col max-md:items-start max-md:space-y-2 max-md:text-xs">
             <span>Emergency: (555) 123-4567</span>
             <span className="flex items-center">
               <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
