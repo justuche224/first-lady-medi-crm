@@ -38,16 +38,16 @@ interface SearchParams {
 const MedicalRecordsPage = async ({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) => {
   const user = await serverAuth();
   if (!user || user.role !== "patient") {
     redirect("/");
   }
 
-  const page = parseInt(searchParams.page || "1");
-  const recordType = searchParams.recordType || "";
-  const search = searchParams.search || "";
+  const page = parseInt((await searchParams).page || "1");
+  const recordType = (await searchParams).recordType || "";
+  const search = (await searchParams).search || "";
 
   // Get medical records data
   const recordsResult = await getMedicalRecords(

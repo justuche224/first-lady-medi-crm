@@ -39,17 +39,17 @@ interface SearchParams {
 const MessagesPage = async ({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) => {
   const user = await serverAuth();
   if (!user || user.role !== "patient") {
     redirect("/");
   }
 
-  const page = parseInt(searchParams.page || "1");
-  const type = searchParams.type || "all";
-  const priority = searchParams.priority || "all";
-  const search = searchParams.search || "";
+  const page = parseInt((await searchParams).page || "1");
+  const type = (await searchParams).type || "all";
+  const priority = (await searchParams).priority || "all";
+  const search = (await searchParams).search || "";
 
   // Get messages data
   const messagesResult = await getMessages(

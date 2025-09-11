@@ -45,17 +45,17 @@ interface SearchParams {
 const NotificationsPage = async ({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) => {
   const user = await serverAuth();
   if (!user || user.role !== "patient") {
     redirect("/");
   }
 
-  const page = parseInt(searchParams.page || "1");
-  const type = searchParams.type || "all";
-  const priority = searchParams.priority || "all";
-  const readFilter = searchParams.read || "all";
+  const page = parseInt((await searchParams).page || "1");
+  const type = (await searchParams).type || "all";
+  const priority = (await searchParams).priority || "all";
+  const readFilter = (await searchParams).read || "all";
 
   // Get notifications data
   const limit = 20;

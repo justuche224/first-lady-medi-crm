@@ -52,17 +52,17 @@ interface SearchParams {
 const FeedbackPage = async ({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) => {
   const user = await serverAuth();
   if (!user || user.role !== "patient") {
     redirect("/");
   }
 
-  const page = parseInt(searchParams.page || "1");
-  const type = searchParams.type || "all";
-  const status = searchParams.status || "all";
-  const search = searchParams.search || "";
+  const page = parseInt((await searchParams).page || "1");
+  const type = (await searchParams).type || "all";
+  const status = (await searchParams).status || "all";
+  const search = (await searchParams).search || "";
 
   // Get feedback data
   const feedbackResult = await getFeedback(

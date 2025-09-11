@@ -40,16 +40,16 @@ interface SearchParams {
 const AppointmentsPage = async ({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) => {
   const user = await serverAuth();
   if (!user || user.role !== "patient") {
     redirect("/");
   }
 
-  const page = parseInt(searchParams.page || "1");
-  const status = searchParams.status || "all";
-  const search = searchParams.search || "";
+  const page = parseInt((await searchParams).page || "1");
+  const status = (await searchParams).status || "all";
+  const search = (await searchParams).search || "";
 
   // Get appointments data
   const appointmentsResult = await getAppointments(

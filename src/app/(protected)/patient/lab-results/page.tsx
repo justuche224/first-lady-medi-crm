@@ -40,17 +40,17 @@ interface SearchParams {
 const LabResultsPage = async ({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) => {
   const user = await serverAuth();
   if (!user || user.role !== "patient") {
     redirect("/");
   }
 
-  const page = parseInt(searchParams.page || "1");
-  const status = searchParams.status || "all";
-  const category = searchParams.category || "all";
-  const search = searchParams.search || "";
+  const page = parseInt((await searchParams).page || "1");
+  const status = (await searchParams).status || "all";
+  const category = (await searchParams).category || "all";
+  const search = (await searchParams).search || "";
 
   // Get lab results data
   const labResultsResult = await getLabResults(

@@ -43,7 +43,7 @@ interface SearchParams {
 const BookAppointmentPage = async ({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) => {
   const user = await serverAuth();
   if (!user || user.role !== "patient") {
@@ -100,8 +100,8 @@ const BookAppointmentPage = async ({
   }
 
   // Pre-selected doctor if coming from a specific doctor page
-  const selectedDoctorId = searchParams.doctorId
-    ? parseInt(searchParams.doctorId)
+  const selectedDoctorId = (await searchParams).doctorId
+    ? parseInt((await searchParams).doctorId!)
     : undefined;
 
   return (
