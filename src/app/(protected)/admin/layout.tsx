@@ -1,7 +1,5 @@
 import { AppSidebar } from "@/components/admin/app-sidebar";
 import { ModeToggle } from "@/components/mode-toggle";
-import {
-} from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
