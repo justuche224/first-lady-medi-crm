@@ -22,74 +22,74 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-
-// Medical CRM Navigation Data
-const data = {
-  user: {
-    name: "Admin User",
-    email: "admin@hospital.com",
-    avatar: "/avatars/admin.jpg",
-  },
-  teams: [
-    {
-      name: "MediCare Hospital",
-      logo: Hospital,
-      plan: "Enterprise",
-    },
-    {
-      name: "MediCare Clinic",
-      logo: Stethoscope,
-      plan: "Professional",
-    },
-  ],
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/admin",
-      icon: BarChart3,
-      isActive: true,
-    },
-    {
-      title: "Patients",
-      url: "/admin/patients",
-      icon: Users,
-    },
-    {
-      title: "Appointments",
-      url: "/admin/appointments",
-      icon: Hospital,
-    },
-    {
-      title: "Doctors",
-      url: "/admin/doctors",
-      icon: Stethoscope,
-    },
-    {
-      title: "Staff",
-      url: "/admin/staffs",
-      icon: UserCheck,
-    },
-    {
-      title: "Departments",
-      url: "/admin/departments",
-      icon: Building2,
-    },
-    {
-      title: "Reports",
-      url: "/admin/reports",
-      icon: FileText,
-    },
-  ],
-  projects: [
-    {
-      name: "View All Departments",
-      url: "/admin/departments",
-      icon: Building2,
-    },
-  ],
-};
+import { authClient } from "@/lib/auth-client";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: session,error,isPending } = authClient.useSession()
+  const data = {
+    user: {
+      name: isPending ? "Loading..." : error ? "Error!" : session?.user?.name || "",
+      email: isPending ? "Loading..." : error ? "Error!" : session?.user?.email || "",
+      avatar: isPending ? "Loading..." : error ? "Error!" : session?.user?.image || "/boy.png",
+    },
+    teams: [
+      {
+        name: "MediCare Hospital",
+        logo: Hospital,
+        plan: "Enterprise",
+      },
+      {
+        name: "MediCare Clinic",
+        logo: Stethoscope,
+        plan: "Professional",
+      },
+    ],
+    navMain: [
+      {
+        title: "Dashboard",
+        url: "/admin",
+        icon: BarChart3,
+        isActive: true,
+      },
+      {
+        title: "Patients",
+        url: "/admin/patients",
+        icon: Users,
+      },
+      {
+        title: "Appointments",
+        url: "/admin/appointments",
+        icon: Hospital,
+      },
+      {
+        title: "Doctors",
+        url: "/admin/doctors",
+        icon: Stethoscope,
+      },
+      {
+        title: "Staff",
+        url: "/admin/staffs",
+        icon: UserCheck,
+      },
+      {
+        title: "Departments",
+        url: "/admin/departments",
+        icon: Building2,
+      },
+      {
+        title: "Reports",
+        url: "/admin/reports",
+        icon: FileText,
+      },
+    ],
+    projects: [
+      {
+        name: "View All Departments",
+        url: "/admin/departments",
+        icon: Building2,
+      },
+    ],
+  };
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
