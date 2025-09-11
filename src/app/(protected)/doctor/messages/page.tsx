@@ -10,7 +10,6 @@ import {
   Paperclip,
   Eye,
   Reply,
-  Archive,
   AlertTriangle,
   Clock,
   CheckCircle,

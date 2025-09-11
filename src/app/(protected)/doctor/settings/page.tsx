@@ -9,7 +9,6 @@ import {
   Palette,
   Globe,
   Save,
-  Eye,
   EyeOff,
 } from "lucide-react";
 import {
@@ -456,7 +455,7 @@ const DoctorSettingsPage = async () => {
                     <SelectContent>
                       <SelectItem value="overview">Overview</SelectItem>
                       <SelectItem value="appointments">
-                        Today's Appointments
+                        Today&apos;s Appointments
                       </SelectItem>
                       <SelectItem value="patients">Patient List</SelectItem>
                       <SelectItem value="messages">Messages</SelectItem>
