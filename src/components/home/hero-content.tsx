@@ -24,7 +24,7 @@ export default function HeroContent() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      whileHover={{ scale: 1.02 }}
+      // whileHover={{ scale: 1.02 }}
       transition={{ type: "spring", stiffness: 300 }}
     >
       <LoginForm />
