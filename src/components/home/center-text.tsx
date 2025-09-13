@@ -18,7 +18,7 @@ export default function CenterText() {
 
   return (
     <motion.div
-      className="md:absolute md:left-2 md:top-32 md:z-20 md:text-left md:max-w-lg md:w-full md:px-8 relative left-0 top-0 max-w-none px-4 text-left w-full"
+      className="md:absolute md:left-2 md:top-32 md:z-20 md:text-left md:max-w-lg md:w-full md:px-8 relative left-0 top-0 max-w-none px-4 text-left w-full hide-on-short-screen"
       variants={textVariants}
       initial="hidden"
       animate="visible"

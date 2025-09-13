@@ -188,3 +188,9 @@
     letter-spacing: var(--tracking-normal);
   }
 }
+
+@media (max-height: 880px) {
+  .hide-on-short-screen {
+    display: none !important;
+  }
+}
