@@ -233,7 +233,7 @@ const Documentation = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-white p-6 rounded-xl shadow-lg"
+                className="bg-card p-6 rounded-xl shadow-lg"
               >
                 <Users className="w-12 h-12 text-blue-600 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2 text-card-foreground">
@@ -249,7 +249,7 @@ const Documentation = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-white p-6 rounded-xl shadow-lg"
+                className="bg-card p-6 rounded-xl shadow-lg"
               >
                 <Shield className="w-12 h-12 text-green-600 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2 text-card-foreground">
@@ -265,7 +265,7 @@ const Documentation = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="bg-white p-6 rounded-xl shadow-lg"
+                className="bg-card p-6 rounded-xl shadow-lg"
               >
                 <Clock className="w-12 h-12 text-purple-600 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2 text-card-foreground">
@@ -1585,7 +1585,7 @@ const Documentation = () => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+                className="bg-card p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
               >
                 <div className="flex items-center mb-6">
                   <div className={`p-3 ${role.color} rounded-lg mr-4`}>
@@ -1641,7 +1641,7 @@ const Documentation = () => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                className="bg-card p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
                 <div className="flex items-center mb-4">
                   <div className="p-3 bg-blue-100 rounded-lg mr-4">
@@ -1681,7 +1681,7 @@ const Documentation = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              className="bg-white p-8 rounded-xl shadow-lg"
+              className="bg-card p-8 rounded-xl shadow-lg"
             >
               <h3 className="text-2xl font-semibold text-card-foreground mb-6">
                 Patient Registration & Onboarding
@@ -1710,7 +1710,7 @@ const Documentation = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white p-8 rounded-xl shadow-lg"
+              className="bg-card p-8 rounded-xl shadow-lg"
             >
               <h3 className="text-2xl font-semibold text-card-foreground mb-6">
                 Appointment Workflow
@@ -1740,7 +1740,7 @@ const Documentation = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white p-8 rounded-xl shadow-lg"
+              className="bg-card p-8 rounded-xl shadow-lg"
             >
               <h3 className="text-2xl font-semibold text-card-foreground mb-6">
                 Medical Treatment Process
@@ -1770,7 +1770,7 @@ const Documentation = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white p-8 rounded-xl shadow-lg"
+              className="bg-card p-8 rounded-xl shadow-lg"
             >
               <h3 className="text-2xl font-semibold text-card-foreground mb-6">
                 Lab Testing Workflow
@@ -1908,7 +1908,7 @@ const Documentation = () => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-lg shadow-md overflow-hidden"
+                className="bg-card rounded-lg shadow-md overflow-hidden"
               >
                 <button
                   onClick={() =>
