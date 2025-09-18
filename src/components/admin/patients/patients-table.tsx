@@ -8,6 +8,7 @@ import {
   UserX,
   UserCheck,
   Eye,
+  Copy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -155,6 +156,11 @@ export function PatientsTable({ patients, onRefresh }: PatientsTableProps) {
     return age.toString();
   };
 
+  const handleCopyPatientId = (patientId: number) => {
+    navigator.clipboard.writeText(patientId.toString());
+    toast.success("Patient ID copied to clipboard");
+  };
+
   return (
     <>
       <div className="rounded-md border">
@@ -162,6 +168,7 @@ export function PatientsTable({ patients, onRefresh }: PatientsTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
+              <TableHead>Patient ID</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Age</TableHead>
@@ -176,7 +183,7 @@ export function PatientsTable({ patients, onRefresh }: PatientsTableProps) {
             {patients.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={9}
+                  colSpan={10}
                   className="text-center py-8 text-muted-foreground"
                 >
                   No patients found
@@ -186,6 +193,19 @@ export function PatientsTable({ patients, onRefresh }: PatientsTableProps) {
               patients.map((patient) => (
                 <TableRow key={patient.id}>
                   <TableCell className="font-medium">{patient.name}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-sm">{patient.id}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0"
+                        onClick={() => handleCopyPatientId(patient.id)}
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </TableCell>
                   <TableCell>{patient.email}</TableCell>
                   <TableCell>{patient.phone || "N/A"}</TableCell>
                   <TableCell>

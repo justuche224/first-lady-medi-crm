@@ -9,6 +9,8 @@ import {
   Users,
   UserCheck,
   Building2,
+  Bed,
+  Calendar,
 } from "lucide-react";
 
 import { NavMain } from "@/components/admin/nav-main";
@@ -25,12 +27,24 @@ import {
 import { authClient } from "@/lib/auth-client";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data: session,error,isPending } = authClient.useSession()
+  const { data: session, error, isPending } = authClient.useSession();
   const data = {
     user: {
-      name: isPending ? "Loading..." : error ? "Error!" : session?.user?.name || "",
-      email: isPending ? "Loading..." : error ? "Error!" : session?.user?.email || "",
-      avatar: isPending ? "Loading..." : error ? "Error!" : session?.user?.image || "/boy.png",
+      name: isPending
+        ? "Loading..."
+        : error
+        ? "Error!"
+        : session?.user?.name || "",
+      email: isPending
+        ? "Loading..."
+        : error
+        ? "Error!"
+        : session?.user?.email || "",
+      avatar: isPending
+        ? "Loading..."
+        : error
+        ? "Error!"
+        : session?.user?.image || "/boy.png",
     },
     teams: [
       {
@@ -75,6 +89,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Departments",
         url: "/admin/departments",
         icon: Building2,
+      },
+      {
+        title: "Bed Spaces",
+        url: "/admin/beds",
+        icon: Bed,
+      },
+      {
+        title: "Occupancy",
+        url: "/admin/occupancy",
+        icon: Calendar,
       },
       {
         title: "Reports",

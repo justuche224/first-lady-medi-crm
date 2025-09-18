@@ -178,3 +178,25 @@ export {
   getDoctorNotifications,
   markDoctorNotificationAsRead,
 } from "./doctor-dashboard-actions";
+
+// Bed Space Management Actions (Admin/Staff/Doctor)
+export {
+  createBedSpace,
+  getBedSpaces,
+  getBedSpaceDetails,
+  updateBedSpace,
+  deleteBedSpace,
+  allocateBed,
+  dischargePatient,
+  transferPatient,
+  updateBedOccupancy,
+  getAvailableBeds,
+  getBedOccupancyHistory,
+  getBedOccupancyStats,
+  getDepartments as getBedDepartments,
+  getWards,
+  type CreateBedSpaceData,
+  type UpdateBedSpaceData,
+  type CreateBedOccupancyData,
+  type UpdateBedOccupancyData,
+} from "./bed-actions";

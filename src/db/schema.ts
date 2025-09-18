@@ -32,6 +32,21 @@ export const messageTypes = [
   "general",
   "urgent",
 ] as const;
+export const bedStatuses = [
+  "available",
+  "occupied",
+  "maintenance",
+  "reserved",
+] as const;
+export const bedTypes = [
+  "general",
+  "icu",
+  "ccu",
+  "emergency",
+  "maternity",
+  "pediatric",
+  "surgical",
+] as const;
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -400,6 +415,57 @@ export const departmentStats = pgTable("department_stats", {
     scale: 2,
   }).default("0.00"),
   revenue: decimal("revenue", { precision: 12, scale: 2 }).default("0.00"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
+
+// Bed Spaces table
+export const bedSpaces = pgTable("bed_spaces", {
+  id: serial("id").primaryKey(),
+  roomNumber: varchar("room_number", { length: 20 }).notNull(),
+  bedNumber: varchar("bed_number", { length: 20 }).notNull(),
+  departmentId: integer("department_id").references(() => departments.id),
+  ward: varchar("ward", { length: 100 }),
+  floor: integer("floor"),
+  type: text("type").$type<(typeof bedTypes)[number]>().notNull(),
+  status: text("status")
+    .$type<(typeof bedStatuses)[number]>()
+    .default("available"),
+  description: text("description"),
+  equipment: text("equipment"), // JSON array of equipment available
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
+
+// Bed Occupancy table
+export const bedOccupancy = pgTable("bed_occupancy", {
+  id: serial("id").primaryKey(),
+  bedId: integer("bed_id")
+    .notNull()
+    .references(() => bedSpaces.id),
+  patientId: integer("patient_id")
+    .notNull()
+    .references(() => patients.id),
+  doctorId: integer("doctor_id").references(() => doctors.id), // attending doctor
+  admissionDate: timestamp("admission_date").notNull(),
+  expectedDischargeDate: date("expected_discharge_date"),
+  actualDischargeDate: timestamp("actual_discharge_date"),
+  admissionReason: text("admission_reason"),
+  diagnosis: text("diagnosis"),
+  notes: text("notes"),
+  priority: text("priority")
+    .$type<(typeof priorityLevels)[number]>()
+    .default("normal"),
+  status: varchar("status", { length: 20 }).default("active"), // active, discharged, transferred
+  transferredFrom: integer("transferred_from"), // reference to previous occupancy
+  transferredTo: integer("transferred_to"), // reference to new occupancy
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()

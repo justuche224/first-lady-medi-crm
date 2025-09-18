@@ -15,6 +15,13 @@
       "when": 1757449946619,
       "tag": "0001_violet_energizer",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1758223771537,
+      "tag": "0002_lucky_winter_soldier",
+      "breakpoints": true
     }
   ]
 }
