@@ -18,10 +18,12 @@ import {
   CheckCircle,
   XCircle,
   RefreshCw,
+  Plus,
 } from "lucide-react";
 import { AppointmentsTable } from "@/components/admin/appointments/appointments-table";
 import { getAppointments } from "@/actions/appointment-actions";
 import { toast } from "sonner";
+import Link from "next/link";
 
 interface Appointment {
   id: number;
@@ -196,6 +198,12 @@ export default function AppointmentsPage() {
             Monitor and manage all system appointments
           </p>
         </div>
+        <Button asChild>
+          <Link href="/admin/appointments/book">
+            <Plus className="mr-2 h-4 w-4" />
+            Book Appointment
+          </Link>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
