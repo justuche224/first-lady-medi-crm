@@ -11,6 +11,7 @@ import {
   Building2,
   Bed,
   Calendar,
+  Link,
 } from "lucide-react";
 
 import { NavMain } from "@/components/admin/nav-main";
@@ -79,6 +80,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Doctors",
         url: "/admin/doctors",
         icon: Stethoscope,
+      },
+      {
+        title: "Patient Assignments",
+        url: "/admin/assignments",
+        icon: Link,
       },
       {
         title: "Staff",

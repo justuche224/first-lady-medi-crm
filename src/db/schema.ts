@@ -444,6 +444,28 @@ export const bedSpaces = pgTable("bed_spaces", {
     .notNull(),
 });
 
+// Patient-Doctor Assignments table
+export const patientDoctorAssignments = pgTable("patient_doctor_assignments", {
+  id: serial("id").primaryKey(),
+  patientId: integer("patient_id")
+    .notNull()
+    .references(() => patients.id, { onDelete: "cascade" }),
+  doctorId: integer("doctor_id")
+    .notNull()
+    .references(() => doctors.id, { onDelete: "cascade" }),
+  assignedBy: text("assigned_by")
+    .notNull()
+    .references(() => user.id, { onDelete: "set null" }),
+  assignedAt: timestamp("assigned_at").defaultNow().notNull(),
+  notes: text("notes"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
+
 // Bed Occupancy table
 export const bedOccupancy = pgTable("bed_occupancy", {
   id: serial("id").primaryKey(),

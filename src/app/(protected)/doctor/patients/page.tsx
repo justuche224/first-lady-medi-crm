@@ -5,7 +5,7 @@ import {
   Users,
   Search,
   Filter,
-  Plus,
+  // Plus,
   Eye,
   Phone,
   Mail,
@@ -81,7 +81,7 @@ const DoctorPatientsPage = async () => {
         : null,
       nextAppointment: null, // Would need additional query for next appointment
       condition: patient.allergies || "No known conditions",
-      status: "active", // All patients are active
+      status: "assigned", // These are explicitly assigned patients
       riskLevel: patient.healthScore
         ? patient.healthScore < 30
           ? "high"
@@ -91,11 +91,17 @@ const DoctorPatientsPage = async () => {
         : "medium",
       image: null,
       totalAppointments: item.totalAppointments || 0,
+      assignedAt: item.assignedAt
+        ? new Date(item.assignedAt).toISOString().split("T")[0]
+        : null,
+      assignmentNotes: item.assignmentNotes || null,
     };
   });
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case "assigned":
+        return "bg-blue-100 text-blue-800";
       case "active":
         return "bg-green-100 text-green-800";
       case "stable":
@@ -158,10 +164,10 @@ const DoctorPatientsPage = async () => {
               </p>
             </div>
           </div>
-          <Button variant="secondary" size="lg">
+          {/* <Button variant="secondary" size="lg">
             <Plus className="h-4 w-4 mr-2" />
             Add Patient
-          </Button>
+          </Button> */}
         </div>
       </div>
 
@@ -282,8 +288,8 @@ const DoctorPatientsPage = async () => {
                   <TableHead>Condition</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Risk Level</TableHead>
+                  <TableHead>Assigned Date</TableHead>
                   <TableHead>Last Visit</TableHead>
-                  <TableHead>Next Appointment</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -354,14 +360,10 @@ const DoctorPatientsPage = async () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <p className="text-sm">{patient.lastVisit}</p>
+                        <p className="text-sm">{patient.assignedAt || "N/A"}</p>
                       </TableCell>
                       <TableCell>
-                        {patient.nextAppointment ? (
-                          <p className="text-sm">{patient.nextAppointment}</p>
-                        ) : (
-                          <p className="text-sm text-gray-500">Not scheduled</p>
-                        )}
+                        <p className="text-sm">{patient.lastVisit}</p>
                       </TableCell>
                       <TableCell>
                         <Button variant="outline" size="sm" asChild>
@@ -375,13 +377,15 @@ const DoctorPatientsPage = async () => {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
+                    <TableCell colSpan={9} className="text-center py-8">
                       <div className="flex flex-col items-center space-y-2">
                         <Users className="h-8 w-8 text-gray-400" />
-                        <p className="text-gray-500">No patients found</p>
+                        <p className="text-gray-500">
+                          No assigned patients found
+                        </p>
                         <p className="text-sm text-gray-400">
-                          Patients will appear here once you have appointments
-                          with them.
+                          Patients will appear here once they are assigned to
+                          you by an administrator.
                         </p>
                       </div>
                     </TableCell>

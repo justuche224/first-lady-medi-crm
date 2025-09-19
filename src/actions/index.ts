@@ -106,6 +106,11 @@ export {
   toggleDoctorBan,
   getDoctorDetails,
   getAvailableDoctorsForBooking,
+  assignPatientToDoctor,
+  unassignPatientFromDoctor,
+  getDoctorAssignedPatients,
+  getPatientAssignedDoctors,
+  getAllPatientDoctorAssignments,
   type CreateDoctorData,
   type UpdateDoctorData,
 } from "./doctor-actions";

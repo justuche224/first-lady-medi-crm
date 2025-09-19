@@ -19,6 +19,7 @@ import {
   feedback,
   departments,
   notifications,
+  patientDoctorAssignments,
 } from "@/db/schema";
 import { eq, and, sql, desc } from "drizzle-orm";
 import { auth } from "@/lib/auth";
@@ -373,7 +374,7 @@ export async function getDoctorRecentActivities(limit = 10) {
 }
 
 /**
- * Get doctor's patients list
+ * Get doctor's assigned patients list
  */
 export async function getDoctorPatients(page = 1, limit = 20, search?: string) {
   try {
@@ -407,23 +408,29 @@ export async function getDoctorPatients(page = 1, limit = 20, search?: string) {
 
     const offset = (page - 1) * limit;
 
-    // Build where clause
-    let whereClause = sql`${appointments.doctorId} = ${doctor[0].id}`;
+    // Build where clause for assigned patients
+    let whereClause = and(
+      eq(patientDoctorAssignments.doctorId, doctor[0].id),
+      eq(patientDoctorAssignments.isActive, true)
+    );
 
     if (search) {
-      whereClause = sql`${whereClause} AND (${
-        patientUsers.name
-      } ILIKE ${`%${search}%`} OR ${patients.phone} ILIKE ${`%${search}%`})`;
+      whereClause = and(
+        whereClause,
+        sql`${users.name} ILIKE ${`%${search}%`} OR ${
+          patients.phone
+        } ILIKE ${`%${search}%`}`
+      );
     }
 
-    // Get unique patients for this doctor
+    // Get assigned patients for this doctor with appointment stats
     const patientsWithCount = await db
       .select({
         patient: {
           id: patients.id,
           userId: patients.userId,
-          name: patientUsers.name,
-          email: patientUsers.email,
+          name: users.name,
+          email: users.email,
           phone: patients.phone,
           dateOfBirth: patients.dateOfBirth,
           gender: patients.gender,
@@ -431,27 +438,38 @@ export async function getDoctorPatients(page = 1, limit = 20, search?: string) {
           allergies: patients.allergies,
           healthScore: patients.healthScore,
         },
+        assignmentNotes: patientDoctorAssignments.notes,
+        assignedAt: patientDoctorAssignments.assignedAt,
         lastAppointment: sql<Date>`max(${appointments.appointmentDate})`,
         totalAppointments: sql<number>`count(${appointments.id})`,
         total: sql<number>`count(*) over()`,
       })
-      .from(appointments)
-      .leftJoin(patients, eq(appointments.patientId, patients.id))
-      .leftJoin(patientUsers, eq(patients.userId, patientUsers.id))
+      .from(patientDoctorAssignments)
+      .innerJoin(patients, eq(patientDoctorAssignments.patientId, patients.id))
+      .innerJoin(users, eq(patients.userId, users.id))
+      .leftJoin(
+        appointments,
+        and(
+          eq(appointments.patientId, patients.id),
+          eq(appointments.doctorId, doctor[0].id)
+        )
+      )
       .where(whereClause)
       .groupBy(
         patients.id,
         patients.userId,
-        patientUsers.name,
-        patientUsers.email,
+        users.name,
+        users.email,
         patients.phone,
         patients.dateOfBirth,
         patients.gender,
         patients.bloodType,
         patients.allergies,
-        patients.healthScore
+        patients.healthScore,
+        patientDoctorAssignments.notes,
+        patientDoctorAssignments.assignedAt
       )
-      .orderBy(desc(sql`max(${appointments.appointmentDate})`))
+      .orderBy(desc(patientDoctorAssignments.assignedAt))
       .limit(limit)
       .offset(offset);
 
@@ -471,7 +489,7 @@ export async function getDoctorPatients(page = 1, limit = 20, search?: string) {
       },
     };
   } catch (error) {
-    console.error("Error fetching doctor patients:", error);
+    console.error("Error fetching doctor assigned patients:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
